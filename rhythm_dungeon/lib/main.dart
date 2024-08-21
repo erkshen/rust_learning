@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:rinf/rinf.dart';
+import './messages/generated.dart';
+import 'package:rhythm_dungeon/messages/direction_messages.pb.dart';
+import 'package:rhythm_dungeon/messages/position_messages.pb.dart';
 
-void main() {
+void main() async {
+  await initializeRust(assignRustSignal);
   runApp(const MyApp());
 }
 
@@ -11,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'RhythmDungeon',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -31,7 +36,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Rhythm Dungeon'),
     );
   }
 }
@@ -55,17 +60,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void move() {
+    // move the player
   }
 
   @override
@@ -105,21 +102,39 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            
+            StreamBuilder(
+              stream: PlayerDirection.rustSignalStream, 
+              builder: (context, snapshot) {
+                final rustSignal = snapshot.data;
+                if (rustSignal == null) {
+                  return Text("No direction yet");
+                }
+                final playerDirection = rustSignal.message;
+                final currentNumber = playerDirection.currentNumber;
+                return Text(currentNumber.toString());
+              }),
+              StreamBuilder(
+              stream: PlayerPosition.rustSignalStream, 
+              builder: (context, snapshot) {
+                final rustSignal = snapshot.data;
+                if (rustSignal == null) {
+                  return Text("No coordinate yet");
+                }
+                final playerPosition = rustSignal.message;
+                final currentPosX = playerPosition.coordinatesX;
+                final currentPosY = playerPosition.coordinatesY;
+                return Text((currentPosX, currentPosY).toString());
+              }),
+              ElevatedButton (
+                onPressed: () {
+                  ChangePosition().sendSignalToRust();
+                },
+                child: Text('Signal to move'),
+              )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),// This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

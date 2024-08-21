@@ -1,0 +1,11 @@
+syntax = "proto3";
+package position_messages;
+
+// [RINF:DART-SIGNAL]
+message ChangePosition {}
+
+// [RINF:RUST-SIGNAL]
+message PlayerPosition { 
+    int32 coordinates_x = 2;
+    int32 coordinates_y = 3;
+}
