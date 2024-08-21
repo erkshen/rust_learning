@@ -1,2 +1,2 @@
-# rust_learning
-learning how to use rust to develop a small app (personal project)
+# rust learning (& flutter!)
+building a small app as an exercise in creating a GUI with flutter with rust as the backend
